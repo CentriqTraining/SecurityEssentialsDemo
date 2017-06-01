@@ -1,0 +1,42 @@
+Use Postman to show:
+
+[Route("StdTypes")]
+		Query String :Works
+		Using form-urlencoded: no work
+		Using Raw/Json: no work
+[Route("Toon")]
+		Query String: no work
+		Using form-urlencoded: works
+		Using Raw/Json: works
+[Route("Explicit")]
+		Query String with both: no work
+		Using Form-urlencoded with both: no work
+		Using Form-urlencoded with one: no work
+		Using Raw/Json with both: no work
+		Using Raw/Json with just the text: works
+[Route("Both")]
+		Query String with all three: no work
+		Using Form-urlencoded with all three: no work
+		Using Raw/Json with all three: no work
+		Using Query String for 2, form-urlencoded with 3rd: works
+		Using Query String for 2, Raw/Json with 3rd: works
+[Route("DTO")]
+		Query String : no work
+		Using form-urlencoded JUST PROPERTY NAMES: no work
+		Using form-urlencoded PREFIXING PROPERTY NAMES: works
+		Using Raw/Json JUST PROPERTY NAMES: no work
+		Using Raw/Json PREFIXING PROPERTY NAMES: no work
+		Using Raw/Json Toon Object + PROPERTY NAMES: works
+
+Validation
+Points of Interest:
+200, 200
+180,-180
+38.969031, -94.609126  Centriq
+38.960468, -94.670420  Microcenter
+
+Security
+Show new project...MVC app with API security
+Back to this project....show token-based auth.
+Show Global-based Antiforgery
+Show Attribute-base antiforgery

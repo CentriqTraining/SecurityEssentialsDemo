@@ -1,0 +1,127 @@
+﻿@{
+    string cookie;
+    string form;
+    AntiForgery.GetTokens("", out cookie, out form);
+}
+@Html.AntiForgeryToken()
+<div class="jumbotron">
+    <h1>Token-based Authentication</h1>
+    <div id="registrationsection">
+        <h2>Registration Via Ajax Call (If needed)</h2>
+        <div class="form-group">
+            <label for="registration_username" class="control-label">Username:</label>
+            <input name="rusername" class="form-control" type="text"
+                   placeholder="Email Address" id="registration_username" />
+        </div>
+        <div class="form-group">
+            <label for="registration_password" class="control-label">Password:</label>
+            <input name="rpassword" class="form-control" type="password"
+                   placeholder="Password" id="registration_password" />
+        </div>
+        <div class="form-group">
+            <label for="registration_passwordconfirm" class="control-label">Confirm Password:</label>
+            <input name="rpasswordconfirm" class="form-control" type="password"
+                   placeholder="Confirm Password" id="registration_passwordconfirm" />
+        </div>
+        <button id="btnRegister" class="btn btn-primary">Register</button>
+        <br />
+    </div>
+</div>
+
+<div class="jumbotron">
+    <div id="loginsection">
+        <h2>Login</h2>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input name="username" class="form-control" type="text" id="username" />
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input name="password" class="form-control" type="password" id="password" />
+        </div>
+        <button id="btnLogin" class="btn btn-primary">Login</button>
+        <div class="text-danger" id="errorInfo"></div>
+    </div>
+    <br />
+    <div class="text-info" id="loginInfo"></div>
+    <br />
+    <div id="valuesApi">
+        <button id="btnGetValues">Get Values</button>
+
+        <div id="result"></div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        (function () {
+            var token = '';
+            $(function () {
+                $('#btnRegister').click(function () {
+                    var AntiForgeryToken = "@cookie" + ":" + "@form";
+                    var datapayload = {
+                        Email: $('#registration_username').val(),
+                        Password: $('#registration_password').val(),
+                        ConfirmPassword: $('#registration_passwordconfirm').val()
+                    };
+                    $.ajax({
+                        url: '/api/account/register',
+                        type: "POST",
+                        contentType: 'application/json',
+                    data: JSON.stringify(datapayload),
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("AntiForgeryToken", AntiForgeryToken);
+                    },
+                    success: function (data) {
+                        $("#result").html("Success!" + data);
+                    },
+                    error: function (err) {
+                        $("#result").text(err.statusText);
+                    }
+                })
+            });
+
+            $('#btnGetValues').click(function () {
+                $.ajax({
+                    url: '/api/values',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", "Bearer " + token);
+                    },
+                    success: function (data) {
+                        var EmpData = JSON.stringify(data.Employees);
+                        var IdentData = JSON.stringify(data.Identity);
+                        $("#result").html("Success! <br />Employee Data Received:<br />" + EmpData + '<br />Identity Information: <br />' + IdentData); //data.join(",")
+                    },
+                    error: function (err) {
+                        $("#result").text(err.statusText);
+                    }
+                });
+            });
+
+            $('#btnLogin').click(function () {
+                $('#btnLogin').attr("disabled", "");
+                var username = $('#username').val();
+                var password = $('#password').val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/Token',
+                    data: {
+                        grant_type: 'password',
+                        username: username,
+                        password: password
+                    },
+                    success: function (data) {
+                        token = data.access_token;
+                        $('#loginsection').hide('slide');
+                        $('#loginInfo').text("Received Token from provider...ready to get values");
+                    },
+                    error: function () {
+                        $("#errorInfo").text("The username or password is invalid.");
+                        $("#btnLogin").removeAttr("disabled");
+                    }
+                });
+            });
+        });
+        })();
+    </script>
+}
